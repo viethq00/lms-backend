@@ -1,0 +1,1946 @@
+swagger: '2.0'
+info:
+    version: 1.0.0
+    title: LMS APIs
+    description: LMS APIs
+    license:
+        name: Github
+        url: ''
+tags:
+    - name: default
+      description: default
+    - name: Admin auth
+      description: Admin APIs
+    - name: Admin user management
+      description: Admin user management APIs
+    - name: Admin history ranking
+      description: History ranking APIs
+    - name: Admin education management
+      description: Admin education management APIs
+    - name: Admin question type management
+      description: Admin question type management APIs
+    - name: Admin question management
+      description: Admin question management APIs
+    - name: Admin feedback management
+      description: Admin feedback management APIs
+    - name: Admin Recevier feedback management
+      description: Admin recevier feedback management APIs
+    - name: Admin file management
+      description: Admin file management APIs
+    - name: Admin dashboard
+      description: Admin dashboard APIs
+    - name: Users
+      description: User APIs
+
+securityDefinitions:
+    bearer:
+        type: apiKey
+        name: authorization
+        in: header
+
+schemes:
+    - http
+    - https
+consumes:
+    - application/json
+produces:
+    - application/json
+paths:
+    /api/admin/login:
+        post:
+            tags:
+                - Admin auth
+            summary: login account
+            parameters:
+                - name: loginBody
+                  in: body
+                  description: login object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - email
+                          - password
+                      $ref: '#/definitions/loginAdminBody'
+            responses:
+                '200':
+                    description: OK
+                '400':
+                    description: Bad Request
+                '500':
+                    description: Server Internal Error
+    /api/admin/refresh-token:
+        post:
+            tags:
+                - Admin auth
+            summary: refresh token api
+            parameters:
+                - name: refreshTokenBody
+                  in: body
+                  description: refresh token input
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - refreshToken
+                      $ref: '#/definitions/refreshTokenBody'
+            responses:
+                '200':
+                    description: OK
+                '400':
+                    description: Bad Request
+                '500':
+                    description: Server Internal Error
+    /api/admin/users:
+        get:
+            tags:
+                - Admin user management
+            summary: Get list accounts
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+                - name: keyword
+                  in: query
+                  required: false
+                  type: string
+                - name: hightest_score
+                  in: query
+                  required: false
+                  type: number
+                - name: status
+                  in: query
+                  required: false
+                  description: 1 - active, 2 - inactive
+                  schema:
+                      type: number
+                      enum: [1, 2]
+                      pattern: '(?:1|2)'
+                - name: role
+                  in: query
+                  required: false
+                  description: role[user, mentor]
+                  schema:
+                      type: string
+                      enum: ['user', 'mentor']
+                      pattern: '(?:user|mentor)'
+                - name: used_app
+                  in: query
+                  required: false
+                  description: 0 - don't use the app, 1 - use the app
+                  schema:
+                      type: number
+                - name: from_date
+                  in: query
+                  required: false
+                  type: string
+                  pattern: '^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$'
+                - name: to_date
+                  in: query
+                  required: false
+                  type: string
+                  pattern: '^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$'
+                - name: schools
+                  in: query
+                  required: false
+                  type: string
+                - name: faculty
+                  in: query
+                  required: false
+                  type: string
+                - name: education_id
+                  in: query
+                  required: false
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        post:
+            tags:
+                - Admin user management
+            summary: create account user
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: user object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - full_name
+                          - email
+                          - role
+                          - personal_id
+                          - expiration_date
+                      $ref: '#/definitions/createUserBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin user management
+            summary: delete user
+            security:
+                - bearer: []
+            parameters:
+                - name: ids
+                  in: body
+                  required: true
+                  description: user ids
+                  schema:
+                      type: array
+                      $ref: '#/definitions/DeleteBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/user/download-csv:
+        get:
+            tags:
+                - Admin user management
+            summary: download all user with csv format
+            security:
+                - bearer: []
+            parameters:
+                - name: schools
+                  in: query
+                  required: true
+                  type: string
+                  example: 62513f01e1e29afd8a98e587
+                - name: faculty
+                  in: query
+                  required: false
+                  type: string
+                  example: 62513f59e1e29afd8a98e597
+                - name: education_id
+                  in: query
+                  required: false
+                  type: string
+                  example: 62513f8fe1e29afd8a98e5a8
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/user/download-csv-old:
+                      get:
+                        tags:
+                          - Admin user management
+                        summary: download all user with csv format
+                        security:
+                          - bearer: [ ]
+                        parameters:
+                          - name: schools
+                            in: query
+                            required: true
+                            type: string
+                            example: 62513f01e1e29afd8a98e587
+                          - name: faculty
+                            in: query
+                            required: false
+                            type: string
+                            example: 62513f59e1e29afd8a98e597
+                          - name: education_id
+                            in: query
+                            required: false
+                            type: string
+                            example: 62513f8fe1e29afd8a98e5a8
+                        responses:
+                          200:
+                            description: OK
+                          400:
+                            description: Bad Request
+                          403:
+                            description: Permission Denied
+                          500:
+                            description: Server Internal Error
+    /api/admin/users/create-mentor:
+        post:
+            tags:
+                - Admin user management
+            summary: create account mentor
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: mentor object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - full_name
+                          - email
+                          - role
+                          - username
+                          - password
+                      $ref: '#/definitions/createMentorBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/users/create-teacher:
+        post:
+            tags:
+                - Admin user management
+            summary: create account role teacher
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: teacher object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - full_name
+                          - email
+                          - username
+                          - password
+                          - school_id
+                      $ref: '#/definitions/createTeacherBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/users/{id}:
+        get:
+            tags:
+                - Admin user management
+            summary: Get detail user
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: user id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        put:
+            tags:
+                - Admin user management
+            summary: Update user
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: user id
+                  type: string
+                - name: body
+                  in: body
+                  description: user object
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateUserBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/users/update-mentor/{id}:
+        put:
+            tags:
+                - Admin user management
+            summary: Update mentor
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: user id
+                  type: string
+                - name: body
+                  in: body
+                  description: mentor object
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateMentorBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/user/update-status:
+        put:
+            tags:
+                - Admin user management
+            summary: Update status user
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  type: string
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                      type: number
+                      enum: [1, 2]
+                      pattern: '(?:1|2)'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/admin/users/import-users:
+        post:
+            tags:
+                - Admin user management
+            summary: Import file excel users.
+            security:
+                - bearer: []
+            consumes:
+                - multipart/form-data
+            parameters:
+                - name: file
+                  in: formData
+                  required: true
+                  type: file
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/user/user-form:
+        get:
+            tags:
+                - Admin user management
+            summary: download user example
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/question-type/import-question-type:
+        post:
+            tags:
+                - Admin question type management
+            summary: Import file excel question type.
+            security:
+                - bearer: []
+            consumes:
+                - multipart/form-data
+            parameters:
+                - name: file
+                  in: formData
+                  description: The uploaded file data
+                  required: true
+                  type: file
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/history-ranking:
+        post:
+            tags:
+                - Admin history ranking
+            summary: Create history ranking
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/question-type:
+        get:
+            tags:
+                - Admin question type management
+            summary: Get list question type
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        post:
+            tags:
+                - Admin question type management
+            summary: Create question type
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: question type object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - parent_id
+                          - name
+                      $ref: '#/definitions/createQuestionTypeBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin question type management
+            summary: question type
+            security:
+                - bearer: []
+            parameters:
+                - name: ids
+                  in: body
+                  required: true
+                  description: question type ids
+                  schema:
+                      type: array
+                      $ref: '#/definitions/DeleteBody'
+    /api/admin/question-type/{id}:
+        get:
+            tags:
+                - Admin question type management
+            summary: Get detail question type
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: question type id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        put:
+            tags:
+                - Admin question type management
+            summary: Updated question type
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: user id
+                  type: string
+                - name: body
+                  in: body
+                  description: question type object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - parent_id
+                          - name
+                      $ref: '#/definitions/createQuestionTypeBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin question type management
+            summary: delete question type
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: user id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/question-type-all:
+        get:
+            tags:
+                - Admin question type management
+            summary: Get list question type all
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/import-questions:
+        post:
+            tags:
+                - Admin question management
+            summary: Import file excel question.
+            security:
+                - bearer: []
+            consumes:
+                - multipart/form-data
+            parameters:
+                - name: file
+                  in: formData
+                  description: The uploaded file data
+                  required: true
+                  type: file
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/questions:
+        get:
+            tags:
+                - Admin question management
+            summary: Get list questions
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+                - name: title
+                  in: query
+                  required: false
+                  type: string
+                - name: root_type
+                  in: query
+                  required: false
+                  type: string
+                - name: child_type
+                  in: query
+                  required: false
+                  type: string
+                - name: image_type
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                      enum: [1, 2, 3]
+                      pattern: '(?:1|2|3)'
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                      enum: [1, 2]
+                      pattern: '(?:1|2)'
+                - name: level
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                      enum: [1, 2]
+                      pattern: '(?:1|2)'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        post:
+            tags:
+                - Admin question management
+            summary: create question.
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: question object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - title
+                          - level
+                          - root_type
+                          - child_type
+                          - last_type
+                          - question_type_id
+                          - option_1
+                          - option_2
+                          - option_3
+                          - option_4
+                          - correct_answer
+                      $ref: '#/definitions/QuestionBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin question management
+            summary: delete question
+            security:
+                - bearer: []
+            parameters:
+                - name: ids
+                  in: body
+                  required: true
+                  description: question ids
+                  schema:
+                      type: array
+                      $ref: '#/definitions/DeleteBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/questions/{id}:
+        get:
+            tags:
+                - Admin question management
+            summary: detail question
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: question id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        put:
+            tags:
+                - Admin question management
+            summary: update question
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: question id
+                  type: string
+                - name: UpdateQuestionBody
+                  in: body
+                  description: user object
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateQuestionBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/admin/question/update-status:
+        put:
+            tags:
+                - Admin question management
+            summary: Update status question
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  type: string
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                      type: number
+                      enum: [1, 2]
+                      pattern: '(?:1|2)'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/question/question-form:
+        get:
+            tags:
+                - Admin question management
+            summary: download question example
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/image-upload:
+        post:
+            tags:
+                - Admin question management
+            summary: upload file image and animation
+            security:
+                - bearer: []
+            consumes:
+                - multipart/form-data
+            parameters:
+                - name: file
+                  in: formData
+                  required: true
+                  type: file
+                - name: mimetype
+                  in: query
+                  required: true
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/admin/feedbacks:
+        get:
+            tags:
+                - Admin feedback management
+            summary: Get list feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+                - name: sort_user
+                  in: query
+                  required: false
+                  description: sort [-1, 1]
+                  type: string
+                - name: sort_answer
+                  in: query
+                  required: false
+                  description: sort [-1, 1]
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin feedback management
+            summary: delete feedbacks
+            security:
+                - bearer: []
+            parameters:
+                - name: ids
+                  in: body
+                  required: true
+                  description: feedback ids
+                  schema:
+                      type: array
+                      $ref: '#/definitions/DeleteBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/feedbacks/{id}:
+        get:
+            tags:
+                - Admin feedback management
+            summary: Get detail feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: feedback id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        post:
+            tags:
+                - Admin feedback management
+            summary: send feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: feedback id
+                  type: string
+                - name: UpdateFeedbackBody
+                  in: body
+                  description: feedback object
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateFeedbackBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/receiver-feedback/indexs:
+        get:
+            tags:
+                - Admin Recevier feedback management
+            summary: Get list receiver feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+                - name: email
+                  in: query
+                  description: email receiver
+                  required: false
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/receiver-feedback/create:
+        post:
+            tags:
+                - Admin Recevier feedback management
+            summary: add receiver feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: array emails
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - emails
+                      $ref: '#/definitions/ReceiverFeedbackBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/receiver-feedback/detail/{id}:
+        get:
+            tags:
+                - Admin Recevier feedback management
+            summary: Get detail Recevier feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/receiver-feedback/delete/{id}:
+        delete:
+            tags:
+                - Admin Recevier feedback management
+            summary: Delete receiver feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/dashboard:
+        get:
+            tags:
+                - Admin dashboard
+            summary: dashboard
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/dashboard/chart-study-results:
+        get:
+            tags:
+                - Admin dashboard
+            summary: dashboard chart learning outcomes
+            security:
+                - bearer: []
+            parameters:
+                - name: schools
+                  in: query
+                  required: false
+                  type: string
+                - name: faculty
+                  in: query
+                  required: false
+                  type: string
+                - name: education_id
+                  in: query
+                  required: false
+                  type: string
+                - name: year
+                  in: query
+                  required: false
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/dashboard/chart-used-time-app:
+        get:
+            tags:
+                - Admin dashboard
+            summary: dashboard chart used time app
+            security:
+                - bearer: []
+            parameters:
+                - name: schools
+                  in: query
+                  required: false
+                  type: string
+                - name: faculty
+                  in: query
+                  required: false
+                  type: string
+                - name: education_id
+                  in: query
+                  required: false
+                  type: string
+                - name: year
+                  in: query
+                  required: false
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/files:
+        get:
+            tags:
+                - Admin file management
+            summary: Get list file
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/educations:
+        get:
+            tags:
+                - Admin education management
+            summary: Get list educations
+            security:
+                - bearer: []
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  description: default = 1
+                  type: number
+                - name: limit
+                  in: query
+                  required: false
+                  description: default 20, maximum = 50
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        post:
+            tags:
+                - Admin education management
+            summary: create education
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: education object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - name
+                          - code
+                          - type
+                      $ref: '#/definitions/CreateEducationBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/educations-parent:
+        get:
+            tags:
+                - Admin education management
+            summary: Get list educations parent
+            security:
+                - bearer: []
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/admin/educations/{id}:
+        get:
+            tags:
+                - Admin education management
+            summary: Get detail education
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: education id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        put:
+            tags:
+                - Admin education management
+            summary: Update education
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: education id
+                  type: string
+                - name: body
+                  in: body
+                  description: education object
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateEducationBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+        delete:
+            tags:
+                - Admin education management
+            summary: Delete education
+            security:
+                - bearer: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: education id
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/login:
+        post:
+            tags:
+                - Users
+            summary: login account
+            parameters:
+                - name: loginBody
+                  in: body
+                  description: login object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - username
+                          - password
+                      $ref: '#/definitions/loginBody'
+            responses:
+                '200':
+                    description: OK
+                '400':
+                    description: Bad Request
+                '500':
+                    description: Server Internal Error
+    /api/user/register:
+        post:
+            tags:
+                - Users
+            summary: register user
+            parameters:
+                - name: body
+                  in: body
+                  description: user object
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - full_name
+                          - email
+                          - username
+                          - password
+                      $ref: '#/definitions/registerUserBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/user/refresh-token:
+        post:
+            tags:
+                - Users
+            summary: refresh token api
+            parameters:
+                - name: refreshTokenBody
+                  in: body
+                  description: refresh token input
+                  required: true
+                  schema:
+                      type: object
+                      required:
+                          - refreshToken
+                      $ref: '#/definitions/refreshTokenBody'
+            responses:
+                '200':
+                    description: OK
+                '400':
+                    description: Bad Request
+                '500':
+                    description: Server Internal Error
+    /api/user/forgot-password:
+        put:
+            tags:
+                - Users
+            summary: forgot password
+            parameters:
+                - name: email
+                  in: query
+                  required: true
+                  type: string
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/user/reset-password:
+        put:
+            tags:
+                - Users
+            summary: reset password
+            parameters:
+                - name: ResetPasswordBody
+                  in: body
+                  description: reset password object
+                  required:
+                      - email
+                      - password
+                  schema:
+                      type: object
+                      $ref: '#/definitions/ResetPasswordBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/user/verify-code:
+        get:
+            tags:
+                - Users
+            summary: verify code
+            parameters:
+                - name: code
+                  in: query
+                  required: true
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                500:
+                    description: Server Internal Error
+    /api/user/detail:
+        get:
+            tags:
+                - Users
+            summary: Get detail user
+            security:
+                - bearer: []
+            parameters:
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/update:
+        put:
+            tags:
+                - Users
+            summary: Update user
+            security:
+                - bearer: []
+            parameters:
+                - name: UpdateUsernameBody
+                  in: body
+                  required: false
+                  schema:
+                      type: object
+                      $ref: '#/definitions/UpdateUsernameBody'
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/update-username:
+        patch:
+            tags:
+                - Users
+            summary: Update username
+            security:
+                - bearer: []
+            parameters:
+                - name: username
+                  in: query
+                  required: true
+                  type: string
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/change-password:
+        put:
+            tags:
+                - Users
+            summary: change password
+            security:
+                - bearer: []
+            parameters:
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+                - name: ChangePasswordBody
+                  in: body
+                  description: change password object
+                  required:
+                      - old_password
+                      - password
+                  schema:
+                      type: object
+                      $ref: '#/definitions/ChangePasswordBody'
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/test:
+        post:
+            tags:
+                - Users
+            summary: creat test
+            security:
+                - bearer: []
+            parameters:
+                - name: root_type
+                  in: query
+                  required: false
+                  type: string
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/test-result:
+        post:
+            tags:
+                - Users
+            summary: test result
+            security:
+                - bearer: []
+            parameters:
+                - name: test_id
+                  in: query
+                  required: true
+                  description: test id
+                  type: string
+                - name: body
+                  in: body
+                  description: test object
+                  required: true
+                  schema:
+                      type: array
+                      $ref: '#/definitions/TestResultBody'
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/my-page:
+        post:
+            tags:
+                - Users
+            summary: my page
+            security:
+                - bearer: []
+            parameters:
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+    /api/user/feedback:
+        post:
+            tags:
+                - Users
+            summary: creat feedback
+            security:
+                - bearer: []
+            parameters:
+                - name: body
+                  in: body
+                  description: feedback object
+                  required: true
+                  schema:
+                      type: object
+                      $ref: '#/definitions/feedbackBody'
+                - name: usage_time
+                  in: query
+                  required: false
+                  description: time using the app
+                  type: number
+            responses:
+                200:
+                    description: OK
+                400:
+                    description: Bad Request
+                403:
+                    description: Permission Denied
+                500:
+                    description: Server Internal Error
+definitions:
+    createUserBody:
+        type: object
+        example:
+            full_name: Admin
+            email: admin@gmail.com
+            personal_id: 123456a
+            role: user
+            expiration_date: 2021-11-10
+            education_id: 61e98c5253939b3ccc124741
+            faculty: 61e98cdad5f574287492a78b
+            schools: 61e98cdad5f574287492a78b
+    registerUserBody:
+        type: Object
+        example:
+            full_name: User
+            email: user@gmail.com
+            username: user
+            password: 123456a
+            birthday: 2021-11-10
+            occupation: student
+            address: Japan
+            course: biology
+            class: 12A2
+    createMentorBody:
+        type: object
+        example:
+            full_name: Admin
+            email: admin@gmail.com
+            username: admin
+            password: admin456
+            role: mentor
+    createTeacherBody:
+        type: object
+        example:
+            full_name: Teacher
+            email: teacher@gmail.com
+            username: teacher
+            password: teacher123
+            school_id: 628fa9a6e517943e6f6edfd4
+    loginAdminBody:
+        type: object
+        example:
+            email: admin@gmail.com
+            password: admin123
+    loginBody:
+        type: object
+        example:
+            username: admin@gmail.com
+            password: admin123
+    refreshTokenBody:
+        type: object
+        example:
+            refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxOGI0YjJmY2Q3ZjVjMTUxYzgxYmIyOSIsImlhdCI6MTYzODI2NDM4NSwiZXhwIjoxNjM5MTI4Mzg1fQ.Kt4Cgiy-tz9aIThplZ8Za_60uUFKowBHxucU0N5Jxvg'
+    UpdateUserBody:
+        type: object
+        example:
+            full_name: admin
+            email: admin@gmail.com
+            personal_id: abc02-ef000002
+            expiration_date: 2025-11-10
+            education_id: 61e98c5253939b3ccc124741
+            faculty: 61e98cdad5f574287492a78b
+            schools: 61e98cdad5f574287492a78b
+    UpdateMentorBody:
+        type: object
+        example:
+            full_name: admin
+            email: admin@gmail.com
+    UpdateUsernameBody:
+        type: object
+        example:
+            username: admin
+            password: admin456
+    ResetPasswordBody:
+        type: object
+        example:
+            email: user@gmail.com
+            password: user345
+    QuestionBody:
+        type: object
+        example:
+            title: 烏口腕筋の起始として正しいものを選びなさい
+            level: 1
+            root_type: 618f921aeef2e337546a01b5
+            child_type: 618f931b101a15292cd6ce71
+            last_type: 61af01996ee2f42dcc930a2b
+            question_type_id: 6184cce9cef91a0ae8d8e8b0
+            image_type: 1
+            path_file: /image/icon.jpg
+            option_1: 肩峰の内側縁
+            option_2: 肩甲骨の外側縁
+            option_3: 肩甲骨の烏口突起
+            option_4: 肩甲骨の上角
+            correct_answer: 4
+    UpdateQuestionBody:
+        type: object
+        example:
+            title: 烏口腕筋の起始として正しいものを選びなさい
+            level: 1
+            root_type: 618f921aeef2e337546a01b5
+            child_type: 618f931b101a15292cd6ce71
+            last_type: 61af01996ee2f42dcc930a2b
+            question_type_id: 6184cce9cef91a0ae8d8e8b0
+            image_type: 1
+            path_file: /image/icon.jpg
+            option_1: 肩峰の内側縁
+            option_2: 肩甲骨の外側縁
+            option_3: 肩甲骨の烏口突起
+            option_4: 肩甲骨の上角
+            correct_answer: 4
+    ReceiverFeedbackBody:
+        type: array
+        example:
+            emails: []
+    TestResultBody:
+        type: array
+        example:
+            answers:
+                [
+                    {
+                        'question_id': '619e5382384faf3f94e84992',
+                        'user_answer': 1,
+                        'child_type': 'A',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e84993',
+                        'user_answer': 0,
+                        'child_type': 'B',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e84994',
+                        'user_answer': 0,
+                        'child_type': 'C',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e84997',
+                        'user_answer': 0,
+                        'child_type': 'A',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e84998',
+                        'user_answer': 0,
+                        'child_type': 'B',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e84999',
+                        'user_answer': 0,
+                        'child_type': 'C',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e8499c',
+                        'user_answer': 0,
+                        'child_type': 'C',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e8499f',
+                        'user_answer': 1,
+                        'child_type': 'B',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e849a1',
+                        'user_answer': 1,
+                        'child_type': 'A',
+                    },
+                    {
+                        'question_id': '619e5382384faf3f94e849a2',
+                        'user_answer': 1,
+                        'child_type': 'D',
+                    },
+                ]
+    DeleteBody:
+        type: array
+        example: ['619f4b16b684d84b28a9f585', '619f4b16b684d84b28a9f586']
+    createQuestionTypeBody:
+        type: object
+        example:
+            education_id: 618f921aeef2e337546a01b5
+    createHistoryRankingBody:
+        type: object
+        example:
+            education_id: 618f921aeef2e337546a01b5
+    feedbackBody:
+        type: object
+        example:
+            question: 筋肉名称?
+    UpdateFeedbackBody:
+        type: object
+        example:
+            answer: 筋肉名称
+    CreateEducationBody:
+        type: object
+        example:
+            name: 札幌スポーツ＆メディカル専門学校
+            code: sap
+            parent_id: 618f921aeef2e337546a01b5
+    UpdateEducationBody:
+        type: object
+        example:
+            name: 札幌スポーツ＆メディカル専門学校
+            code: sap
+            parent_id: 618f921aeef2e337546a01b5
+    ChangePasswordBody:
+        type: object
+        example:
+            old_password: admin123
+            password: admin345

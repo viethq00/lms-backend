@@ -1,0 +1,16 @@
+module.exports = {
+    UserModel: require('./user.model'),
+    QuestionModel: require('./question.model'),
+    TestModel: require('./test.model'),
+    AnswerModel: require('./answer.model'),
+    QuestionTypeModel: require('./question_type.model'),
+    StatisticModel: require('./statistic.model'),
+    FeedbackModel: require('./feedback.model'),
+    ReceiverFeedbackModel: require('./receiver_feedback.model'),
+    HistoryRankingModel: require('./history_ranking.model'),
+    AptitudeTestModel: require('./aptitude_test.model'),
+    MediaModel: require('./media.model'),
+    EducationModel: require('./education.model'),
+    HistoryUsedTime: require('./history_used_time.model'),
+    StatisticUsedTimeModel: require('./statistic_used_time.model'),
+};
